@@ -1,0 +1,44 @@
+{
+    "name": "facile/json-api-php",
+    "description": "",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^7.1",
+        "ext-json": "^1.5",
+        "psr/container": "^1.0"
+    },
+    "require-dev": {
+        "facile-it/facile-coding-standard": "^0.3.1",
+        "facile-it/moka": "^2.2",
+        "facile-it/paraunit": "^0.12.3",
+        "phpstan/phpstan": "^0.11.1"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true,
+        "gitlab-domains": [
+            "gitlab.facile.it"
+        ]
+    },
+    "autoload": {
+        "psr-4": {
+            "Facile\\JsonApiPhp\\": "src/"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Facile\\JsonApiPhp\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "cs-check": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix --diff"
+    }
+}
