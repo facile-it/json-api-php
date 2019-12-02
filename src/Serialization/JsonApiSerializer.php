@@ -79,12 +79,12 @@ class JsonApiSerializer implements JsonApiSerializerInterface
         return array_reduce(
             $element,
             static function ($valid, $item) use ($all): bool {
-                $isReference = true === self::isReference($item);
+                $isReference = self::isReference($item);
                 if (true === $all) {
-                    return true === $valid && $isReference;
+                    return true === $valid && true === $isReference;
                 }
 
-                return true === $valid || $isReference;
+                return true === $valid || true === $isReference;
             },
             $all
         );
@@ -102,11 +102,11 @@ class JsonApiSerializer implements JsonApiSerializerInterface
 
     /**
      * @param array $reference
-     * @param bool $condition
+     * @param bool $checkKeyReference
      *
      * @return array
      */
-    private static function filterKeyOrAttributes(array $reference, bool $condition = false): array
+    private static function filterKeyOrAttributes(array $reference, bool $checkKeyReference = false): array
     {
         $newReference = [];
         foreach ($reference as $key => $item) {
@@ -114,7 +114,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                 continue;
             }
 
-            if (true === $condition && true === self::isKeyReference($key)) {
+            if (true === $checkKeyReference && true === self::isKeyReference($key)) {
                 continue;
             }
 
@@ -123,11 +123,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
             }
 
             if (true === is_array($item) && false === is_a_real_array($item)) {
-                $mergedReference = array_merge(
-                    $newReference[$key] ?? [],
-                    self::filterKeyOrAttributes($item)
-                );
-
+                $mergedReference = self::filterKeyOrAttributes($item);
                 if (false === empty($mergedReference)) {
                     $newReference[$key] = $mergedReference;
                 }
@@ -191,7 +187,6 @@ class JsonApiSerializer implements JsonApiSerializerInterface
             ] = $this->parseReference($relationship);
 
             $relationship = self::keepReferenceKeys($relationship);
-
             if (true === $recursion) {
                 $newRelationships[$key] = $relationship;
             } else {

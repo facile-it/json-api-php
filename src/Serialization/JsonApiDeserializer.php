@@ -44,20 +44,6 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @return bool
      */
-    private static function isData($element): bool
-    {
-        if (false === is_array($element)) {
-            return false;
-        }
-
-        return true === array_key_exists(self::REFERENCE_DATA, $element);
-    }
-
-    /**
-     * @param mixed $element
-     *
-     * @return bool
-     */
     private static function isReference($element): bool
     {
         if (false === is_array($element)) {
@@ -124,7 +110,13 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
             return $references;
         }
 
-        $references = $elements[self::REFERENCE_INCLUDED];
+        foreach ($elements[self::REFERENCE_INCLUDED] as $reference) {
+            if (false === array_keys_exists([self::REFERENCE_KEYS_TYPE, self::REFERENCE_KEYS_ID], $reference)) {
+                continue;
+            }
+
+            $references[$reference[self::REFERENCE_KEYS_TYPE]][$reference[self::REFERENCE_KEYS_ID]] = $reference;
+        }
 
         unset($elements[self::REFERENCE_INCLUDED]);
 
@@ -146,41 +138,32 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
         $relationships = $relationship[self::REFERENCE_RELATIONSHIPS] ?? [];
 
         if (false === array_keys_exists([self::REFERENCE_ATTRIBUTES, self::REFERENCE_RELATIONSHIPS], $relationship)) {
-            foreach ($this->referencesContainer as $reference) {
-                if ($reference[self::REFERENCE_KEYS_TYPE] !== $relationship[self::REFERENCE_KEYS_TYPE]
-                    || $reference[self::REFERENCE_KEYS_ID] !== $relationship[self::REFERENCE_KEYS_ID]) {
-                    continue;
-                }
-
+            $reference = $this->referencesContainer[
+                $relationship[self::REFERENCE_KEYS_TYPE]
+                ][
+                    $relationship[self::REFERENCE_KEYS_ID]
+                ] ?? null;
+            if (null !== $reference) {
                 $attributes = $reference[self::REFERENCE_ATTRIBUTES] ?? [];
                 $relationships = $reference[self::REFERENCE_RELATIONSHIPS] ?? [];
-
-                break;
             }
         }
 
         unset($relationship[self::REFERENCE_ATTRIBUTES], $relationship[self::REFERENCE_RELATIONSHIPS]);
 
         $relationships = array_map(
-            function ($relationship) {
-                if (false === self::isData($relationship[1])) {
-                    return $relationship;
-                }
-
-                return $this->parseRelationship($relationship[0], $relationship[1][self::REFERENCE_DATA]);
+            function ($key, $item) {
+                return $this->parseRelationship($key, $item[self::REFERENCE_DATA]);
             },
-            array_map(
-                null,
-                array_keys($relationships),
-                array_values($relationships)
-            )
+            array_keys($relationships),
+            $relationships
         );
 
         $completedRelationship = array_merge_recursive(
             self::keepReferenceKeys($relationship),
             $attributes,
             true === empty($relationships)
-                ? $relationships
+                ? []
                 : array_merge(
                     ...$relationships
                 )
