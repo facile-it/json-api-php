@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Facile\JsonApiPhp\Serialization;
 
+use RuntimeException;
+
 class JsonApiSerializer implements JsonApiSerializerInterface
 {
     /** @var string */
@@ -17,11 +19,16 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     /**
      * @param string $jsonString
      *
-     * @return string|bool
+     * @throws RuntimeException
+     *
+     * @return string
      */
-    public function serialize(string $jsonString)
+    public function serialize(string $jsonString): string
     {
         $elements = json_decode($jsonString, true);
+        if (null === $elements) {
+            throw new RuntimeException('Not valid JSON string');
+        }
 
         $jsonApiArray = [];
         $jsonApiArray[self::REFERENCE_DATA] = $this->processRecursiveElement(
@@ -33,15 +40,22 @@ class JsonApiSerializer implements JsonApiSerializerInterface
             )
         );
 
-        return json_encode($jsonApiArray, JSON_PRETTY_PRINT);
+        $outputString = json_encode($jsonApiArray, JSON_PRETTY_PRINT);
+        if (false === $outputString) {
+            throw new RuntimeException('Error during JSON encoding of the object');
+        }
+
+        return $outputString;
     }
 
     /**
      * @param string $jsonString
      *
-     * @return string|bool
+     * @throws RuntimeException
+     *
+     * @return string
      */
-    public function __invoke(string $jsonString)
+    public function __invoke(string $jsonString): string
     {
         return $this->serialize($jsonString);
     }
