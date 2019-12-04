@@ -21,9 +21,9 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @throws RuntimeException
      *
-     * @return string
+     * @return array
      */
-    public function deserialize(string $jsonApiString): string
+    public function deserialize(string $jsonApiString): array
     {
         $elements = json_decode($jsonApiString, true);
         if (null === $elements) {
@@ -31,9 +31,20 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
         }
 
         $this->referencesContainer = self::moveReferences($elements);
-        $jsonStringArray = $this->parseData($elements[self::REFERENCE_DATA] ?? []);
 
-        $outputString = json_encode($jsonStringArray, JSON_PRETTY_PRINT);
+        return $this->parseData($elements[self::REFERENCE_DATA] ?? []);
+    }
+
+    /**
+     * @param string $jsonApiString
+     *
+     * @throws RuntimeException
+     *
+     * @return string
+     */
+    public function deserializeToString(string $jsonApiString): string
+    {
+        $outputString = json_encode($this->deserialize($jsonApiString), JSON_PRETTY_PRINT);
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
@@ -46,9 +57,9 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @throws RuntimeException
      *
-     * @return string
+     * @return array
      */
-    public function __invoke(string $jsonApiString): string
+    public function __invoke(string $jsonApiString): array
     {
         return $this->deserialize($jsonApiString);
     }

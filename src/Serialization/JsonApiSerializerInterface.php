@@ -9,14 +9,21 @@ interface JsonApiSerializerInterface extends JsonApiInterface
     /**
      * @param string $jsonString
      *
-     * @return string
+     * @return array
      */
-    public function serialize(string $jsonString): string;
+    public function serialize(string $jsonString): array;
 
     /**
      * @param string $jsonString
      *
      * @return string
      */
-    public function __invoke(string $jsonString): string;
+    public function serializeToString(string $jsonString): string;
+
+    /**
+     * @param string $jsonString
+     *
+     * @return array
+     */
+    public function __invoke(string $jsonString): array;
 }

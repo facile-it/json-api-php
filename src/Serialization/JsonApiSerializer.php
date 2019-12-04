@@ -21,9 +21,9 @@ class JsonApiSerializer implements JsonApiSerializerInterface
      *
      * @throws RuntimeException
      *
-     * @return string
+     * @return array
      */
-    public function serialize(string $jsonString): string
+    public function serialize(string $jsonString): array
     {
         $elements = json_decode($jsonString, true);
         if (null === $elements) {
@@ -40,7 +40,19 @@ class JsonApiSerializer implements JsonApiSerializerInterface
             )
         );
 
-        $outputString = json_encode($jsonApiArray, JSON_PRETTY_PRINT);
+        return $jsonApiArray;
+    }
+
+    /**
+     * @param string $jsonString
+     *
+     * @throws RuntimeException
+     *
+     * @return string
+     */
+    public function serializeToString(string $jsonString): string
+    {
+        $outputString = json_encode($this->serialize($jsonString), JSON_PRETTY_PRINT);
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
@@ -53,9 +65,9 @@ class JsonApiSerializer implements JsonApiSerializerInterface
      *
      * @throws RuntimeException
      *
-     * @return string
+     * @return array
      */
-    public function __invoke(string $jsonString): string
+    public function __invoke(string $jsonString): array
     {
         return $this->serialize($jsonString);
     }
