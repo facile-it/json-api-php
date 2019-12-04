@@ -17,19 +17,12 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     private $referencesContainer = [];
 
     /**
-     * @param string $jsonString
-     *
-     * @throws RuntimeException
+     * @param array $elements
      *
      * @return array
      */
-    public function serialize(string $jsonString): array
+    public function serialize(array $elements): array
     {
-        $elements = json_decode($jsonString, true);
-        if (null === $elements) {
-            throw new RuntimeException('Not valid JSON string');
-        }
-
         $jsonApiArray = [];
         $jsonApiArray[self::REFERENCE_DATA] = $this->processRecursiveElement(
             $elements
@@ -50,9 +43,14 @@ class JsonApiSerializer implements JsonApiSerializerInterface
      *
      * @return string
      */
-    public function serializeToString(string $jsonString): string
+    public function serializeString(string $jsonString): string
     {
-        $outputString = json_encode($this->serialize($jsonString), JSON_PRETTY_PRINT);
+        $elements = json_decode($jsonString, true);
+        if (null === $elements) {
+            throw new RuntimeException('Not valid JSON string');
+        }
+
+        $outputString = json_encode($this->serialize($elements), JSON_PRETTY_PRINT);
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
@@ -61,15 +59,13 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     }
 
     /**
-     * @param string $jsonString
-     *
-     * @throws RuntimeException
+     * @param array $elements
      *
      * @return array
      */
-    public function __invoke(string $jsonString): array
+    public function __invoke(array $elements): array
     {
-        return $this->serialize($jsonString);
+        return $this->serialize($elements);
     }
 
     /**

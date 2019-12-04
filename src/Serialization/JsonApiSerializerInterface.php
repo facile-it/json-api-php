@@ -4,26 +4,30 @@ declare(strict_types=1);
 
 namespace Facile\JsonApiPhp\Serialization;
 
+use RuntimeException;
+
 interface JsonApiSerializerInterface extends JsonApiInterface
 {
     /**
-     * @param string $jsonString
+     * @param array $elements
      *
      * @return array
      */
-    public function serialize(string $jsonString): array;
+    public function serialize(array $elements): array;
 
     /**
      * @param string $jsonString
+     *
+     * @throws RuntimeException
      *
      * @return string
      */
-    public function serializeToString(string $jsonString): string;
+    public function serializeString(string $jsonString): string;
 
     /**
-     * @param string $jsonString
+     * @param array $elements
      *
      * @return array
      */
-    public function __invoke(string $jsonString): array;
+    public function __invoke(array $elements): array;
 }

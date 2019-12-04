@@ -28,7 +28,7 @@ class JsonApiSerializerTest extends TestCase
     {
         $this->assertEquals(
             $expectedJsonString,
-            $this->jsonApiSerializer->serializeToString($jsonString)
+            $this->jsonApiSerializer->serializeString($jsonString)
         );
     }
 
