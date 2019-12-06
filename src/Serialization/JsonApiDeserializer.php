@@ -14,15 +14,21 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     /** @var string */
     private const REFERENCE_KEYS_ID = 'id';
 
+    /** @var bool */
+    private $flattenedRelationships;
+
+    /** @var array */
     private $referencesContainer = [];
 
     /**
      * @param array $elements
+     * @param bool $flattenedRelationships
      *
      * @return array
      */
-    public function deserialize(array $elements): array
+    public function deserialize(array $elements, bool $flattenedRelationships = true): array
     {
+        $this->flattenedRelationships = $flattenedRelationships;
         $this->referencesContainer = self::moveReferences($elements);
 
         return $this->parseData($elements[self::REFERENCE_DATA] ?? []);
@@ -30,19 +36,20 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
     /**
      * @param string $jsonApiString
+     * @param bool $flattenedRelationships
      *
      * @return string
      * @throws RuntimeException
      *
      */
-    public function deserializeToString(string $jsonApiString): string
+    public function deserializeToString(string $jsonApiString, bool $flattenedRelationships = true): string
     {
         $elements = json_decode($jsonApiString, true);
         if (null === $elements) {
             throw new RuntimeException('Not valid JSON string');
         }
 
-        $outputString = json_encode($this->deserialize($elements), JSON_PRETTY_PRINT);
+        $outputString = json_encode($this->deserialize($elements, $flattenedRelationships), JSON_PRETTY_PRINT);
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
@@ -52,12 +59,13 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
     /**
      * @param array $elements
+     * @param bool $flattenedRelationships
      *
      * @return array
      */
-    public function __invoke(array $elements): array
+    public function __invoke(array $elements, bool $flattenedRelationships = true): array
     {
-        return $this->deserialize($elements);
+        return $this->deserialize($elements, $flattenedRelationships);
     }
 
     /**

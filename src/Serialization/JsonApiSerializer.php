@@ -14,15 +14,22 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     /** @var string */
     private const REFERENCE_KEYS_ID = '_id';
 
+    /** @var bool */
+    private $flattenedRelationships;
+
+    /** @var array */
     private $referencesContainer = [];
 
     /**
      * @param array $elements
+     * @param bool $flattenedRelationships
      *
      * @return array
      */
-    public function serialize(array $elements): array
+    public function serialize(array $elements, bool $flattenedRelationships = true): array
     {
+        $this->flattenedRelationships = $flattenedRelationships;
+
         $jsonApiArray = [];
         $jsonApiArray[self::REFERENCE_DATA] = $this->processRecursiveElement(
             $elements
@@ -41,19 +48,20 @@ class JsonApiSerializer implements JsonApiSerializerInterface
 
     /**
      * @param string $jsonString
+     * @param bool $flattenedRelationships
      *
      * @throws RuntimeException
      *
      * @return string
      */
-    public function serializeString(string $jsonString): string
+    public function serializeString(string $jsonString, bool $flattenedRelationships = true): string
     {
         $elements = json_decode($jsonString, true);
         if (null === $elements) {
             throw new RuntimeException('Not valid JSON string');
         }
 
-        $outputString = json_encode($this->serialize($elements), JSON_PRETTY_PRINT);
+        $outputString = json_encode($this->serialize($elements, $flattenedRelationships), JSON_PRETTY_PRINT);
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
@@ -63,12 +71,13 @@ class JsonApiSerializer implements JsonApiSerializerInterface
 
     /**
      * @param array $elements
+     * @param bool $flattenedRelationships
      *
      * @return array
      */
-    public function __invoke(array $elements): array
+    public function __invoke(array $elements, bool $flattenedRelationships = true): array
     {
-        return $this->serialize($elements);
+        return $this->serialize($elements, $flattenedRelationships);
     }
 
     /**
