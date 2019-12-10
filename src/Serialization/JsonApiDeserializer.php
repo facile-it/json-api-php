@@ -31,9 +31,9 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     /**
      * @param string $jsonApiString
      *
+     * @return string
      * @throws RuntimeException
      *
-     * @return string
      */
     public function deserializeToString(string $jsonApiString): string
     {
@@ -112,7 +112,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
         if (true === array_key_exists(self::REFERENCE_KEYS_ID, $reference)) {
             $keys['_' . self::REFERENCE_KEYS_ID] = is_numeric($reference[self::REFERENCE_KEYS_ID])
-                ? (int) $reference[self::REFERENCE_KEYS_ID]
+                ? (int)$reference[self::REFERENCE_KEYS_ID]
                 : $reference[self::REFERENCE_KEYS_ID];
         }
 
@@ -151,19 +151,13 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      */
     private function completeRelationship(array $relationship): ?array
     {
-        if (true === empty($this->referencesContainer)) {
-            return $relationship;
-        }
-
         $attributes = $relationship[self::REFERENCE_ATTRIBUTES] ?? [];
         $relationships = $relationship[self::REFERENCE_RELATIONSHIPS] ?? [];
 
-        if (false === array_keys_exists([self::REFERENCE_ATTRIBUTES, self::REFERENCE_RELATIONSHIPS], $relationship)) {
-            $reference = $this->referencesContainer[
-                $relationship[self::REFERENCE_KEYS_TYPE]
-                ][
-                    $relationship[self::REFERENCE_KEYS_ID]
-                ] ?? null;
+        if (false === empty($this->referencesContainer)
+            && false === array_keys_exists([self::REFERENCE_ATTRIBUTES, self::REFERENCE_RELATIONSHIPS], $relationship)
+        ) {
+            $reference = $this->referencesContainer[$relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]] ?? null;
             if (null !== $reference) {
                 $attributes = $reference[self::REFERENCE_ATTRIBUTES] ?? [];
                 $relationships = $reference[self::REFERENCE_RELATIONSHIPS] ?? [];
@@ -186,8 +180,8 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
             true === empty($relationships)
                 ? []
                 : array_merge(
-                    ...$relationships
-                )
+                ...$relationships
+            )
         );
 
         return true === empty($completedRelationship)
