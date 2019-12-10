@@ -208,10 +208,21 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                 continue;
             }
 
+            //$this->flattenedRelationships
+
             if (false === self::isReference($relationship)) {
-                $newRelationships[$key] = [
-                    self::REFERENCE_DATA => $this->extractRelationships($relationship, true),
-                ];
+                $nestedRelationships = $this->extractRelationships($relationship, true);
+                foreach ($nestedRelationships as $subKey => $nestedRelationship) {
+                    if (true === is_int($subKey)) {
+                        $newRelationships[$key] = [
+                            self::REFERENCE_DATA => $nestedRelationship,
+                        ];
+                    } else {
+                        $newRelationships[$key . '.' . $subKey] = [
+                            self::REFERENCE_DATA => $nestedRelationship,
+                        ];
+                    }
+                }
 
                 continue;
             }

@@ -57,7 +57,11 @@ class JsonApiSerializerTest extends TestCase
          "bb":{
             "_type":"b",
             "_id":1,
+            "ccc":{
+            "_type":"c",
+            "_id":1,
             "a":1
+            }
          }
       },
       "d":{
