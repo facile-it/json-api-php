@@ -27,11 +27,14 @@ class JsonApiSerializer implements JsonApiSerializerInterface
         $jsonApiArray[self::REFERENCE_DATA] = $this->processRecursiveElement(
             $elements
         );
-        $jsonApiArray[self::REFERENCE_INCLUDED] = array_merge(
-            ...array_values(
-                $this->referencesContainer
-            )
-        );
+
+        if (false === empty($this->referencesContainer)) {
+            $jsonApiArray[self::REFERENCE_INCLUDED] = array_merge(
+                ...array_values(
+                    $this->referencesContainer
+                )
+            );
+        }
 
         return $jsonApiArray;
     }
@@ -205,7 +208,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
             }
 
             $this->referencesContainer[
-                $relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]
+            $relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]
             ] = $this->parseReference($relationship);
 
             $relationship = self::keepReferenceKeys($relationship);
