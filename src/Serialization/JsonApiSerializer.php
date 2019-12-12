@@ -210,7 +210,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
 
             if (false === self::isReference($relationship)) {
                 $nestedRelationships = $this->extractRelationships($relationship, true);
-                if (false === $this->flattenedRelationships) {
+                if (false === $this->flattenedRelationships || true === is_a_real_array($nestedRelationships)) {
                     $newRelationships[$key] = [
                         self::REFERENCE_DATA => $nestedRelationships,
                     ];
