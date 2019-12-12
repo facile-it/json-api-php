@@ -8,11 +8,10 @@
          beStrictAboutTodoAnnotatedTests="true"
          verbose="true">
     <testsuites>
-        <testsuite name="unit">
-            <directory suffix="Test.php">tests/Unit</directory>
+        <testsuite name="tests">
+            <directory suffix="Test.php">tests</directory>
         </testsuite>
     </testsuites>
-
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
