@@ -211,34 +211,21 @@ class JsonApiSerializer implements JsonApiSerializerInterface
             $nestedRelationships = $this->extractRelationships($relationship, true);
             if (false === empty($nestedRelationships)) {
                 if (false === $this->flattenedRelationships || true === is_a_real_array($nestedRelationships)) {
-                    $newRelationships[$key] = array_merge_recursive(
-                        $newRelationships[$key] ?? [],
-                        [
-                            self::REFERENCE_DATA => $nestedRelationships,
-                        ]
-                    );
+                    $newRelationships[$key] = [
+                        self::REFERENCE_DATA => $nestedRelationships,
+                    ];
                 } else {
                     foreach ($nestedRelationships as $subKey => $nestedRelationship) {
                         if (true === is_int($subKey)) {
-                            $newRelationships[$key] = array_merge_recursive(
-                                $newRelationships[$key] ?? [],
-                                [
-                                    self::REFERENCE_DATA => $nestedRelationship,
-                                ]
-                            );
+                            $newRelationships[$key][$subKey] = [
+                                self::REFERENCE_DATA => $nestedRelationship,
+                            ];
+                        } elseif (true === $recursion) {
+                            $newRelationships[$key . '.' . $subKey] = $nestedRelationship;
                         } else {
-                            if (true === $recursion) {
-                                $element = $nestedRelationship;
-                            } else {
-                                $element = [
-                                    self::REFERENCE_DATA => $nestedRelationship,
-                                ];
-                            }
-
-                            $newRelationships[$key . '.' . $subKey] = array_merge_recursive(
-                                $newRelationships[$key . '.' . $subKey] ?? [],
-                                $element
-                            );
+                            $newRelationships[$key . '.' . $subKey] = [
+                                self::REFERENCE_DATA => $nestedRelationship,
+                            ];
                         }
                     }
                 }
