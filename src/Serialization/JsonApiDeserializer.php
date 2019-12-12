@@ -15,7 +15,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     private const REFERENCE_KEYS_ID = 'id';
 
     /** @var bool */
-    private $flattenedRelationships;
+    private $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS;
 
     /** @var array */
     private $referencesContainer = [];
@@ -153,6 +153,50 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     }
 
     /**
+     * @param array $relationships
+     *
+     * @return array
+     */
+    private static function unnestRelationships(array $relationships): array
+    {
+        if (true === empty($relationships)) {
+            return $relationships;
+        }
+
+        foreach ($relationships as $path => $relation) {
+            if (self::REFERENCE_DATA === $path
+                || self::REFERENCE_ATTRIBUTES === $path
+                || self::REFERENCE_RELATIONSHIPS === $path
+                || self::REFERENCE_KEYS_ID === $path
+                || self::REFERENCE_KEYS_TYPE === $path
+            ) {
+                continue;
+            }
+
+            $pathParts = explode(self::NESTED_SEPARATOR, $path);
+            if (count($pathParts) > 1) {
+                $mainPath = current($pathParts);
+                $current = &$relationships[$mainPath] ?? [];
+
+                array_shift($pathParts);
+
+                foreach ($pathParts as $key) {
+                    $current = &$current[$key];
+                }
+
+                $relationships[$mainPath] = array_merge_recursive(
+                    $relationships[$mainPath],
+                    $relation
+                );
+
+                unset($relationships[$path]);
+            }
+        }
+
+        return $relationships;
+    }
+
+    /**
      * @param array $relationship
      *
      * @return array|null
@@ -161,6 +205,10 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     {
         $attributes = $relationship[self::REFERENCE_ATTRIBUTES] ?? [];
         $relationships = $relationship[self::REFERENCE_RELATIONSHIPS] ?? [];
+
+        if (true === $this->flattenedRelationships) {
+            $relationships = self::unnestRelationships($relationships);
+        }
 
         if (false === empty($this->referencesContainer)
             && false === array_keys_exists([self::REFERENCE_ATTRIBUTES, self::REFERENCE_RELATIONSHIPS], $relationship)

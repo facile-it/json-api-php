@@ -50,18 +50,28 @@ class JsonApiDeserializerTest extends TestCase
                 "f": []
             },
             "relationships": {
+                "b.b": {
+                    "data": {
+                        "type": "b",
+                        "id": "1"
+                    }
+                },
                 "b": {
                     "data": {
                         "type": "a",
                         "id": "1"
                     }
                 },
-                "c": {
+                "c.bb.ccc": {
                     "data": {
-                        "bb": {
-                            "type": "b",
-                            "id": "1"
-                        }
+                        "type": "c",
+                        "id": "1"
+                    }
+                },
+                "c.bb": {
+                    "data": {
+                        "type": "b",
+                        "id": "1"
                     }
                 },
                 "d": {
@@ -70,18 +80,26 @@ class JsonApiDeserializerTest extends TestCase
                         "id": "2"
                     }
                 },
-                "e": {
-                    "data": [
-                        {
+                "e.0.ccc": {
+                    "data": {
+                        "type": "type",
+                        "id": "2"
+                    }
+                },
+                "e": [
+                    {
+                        "data": {
                             "type": "type",
                             "id": "1"
-                        },
-                        {
+                        }
+                    },
+                    {
+                        "data": {
                             "type": "type",
                             "id": "3"
                         }
-                    ]
-                }
+                    }
+                ]
             }
         }
     ],
@@ -89,8 +107,13 @@ class JsonApiDeserializerTest extends TestCase
         {
             "type": "b",
             "id": "1",
-            "attributes": {
-                "a": 1
+            "relationships": {
+                "ccc": {
+                    "data": {
+                        "type": "c",
+                        "id": "1"
+                    }
+                }
             }
         },
         {
@@ -111,6 +134,13 @@ class JsonApiDeserializerTest extends TestCase
         {
             "type": "a",
             "id": "2",
+            "attributes": {
+                "a": 1
+            }
+        },
+        {
+            "type": "c",
+            "id": "1",
             "attributes": {
                 "a": 1
             }

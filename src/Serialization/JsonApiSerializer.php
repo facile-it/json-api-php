@@ -15,7 +15,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     private const REFERENCE_KEYS_ID = '_id';
 
     /** @var bool */
-    private $flattenedRelationships;
+    private $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS;
 
     /** @var array */
     private $referencesContainer = [];
@@ -221,9 +221,9 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                                 self::REFERENCE_DATA => $nestedRelationship,
                             ];
                         } elseif (true === $recursion) {
-                            $newRelationships[$key . '.' . $subKey] = $nestedRelationship;
+                            $newRelationships[$key . self::NESTED_SEPARATOR . $subKey] = $nestedRelationship;
                         } else {
-                            $newRelationships[$key . '.' . $subKey] = [
+                            $newRelationships[$key . self::NESTED_SEPARATOR . $subKey] = [
                                 self::REFERENCE_DATA => $nestedRelationship,
                             ];
                         }
