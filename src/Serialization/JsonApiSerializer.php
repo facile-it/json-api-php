@@ -208,41 +208,63 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                 continue;
             }
 
-            if (false === self::isReference($relationship)) {
-                $nestedRelationships = $this->extractRelationships($relationship, true);
+            $nestedRelationships = $this->extractRelationships($relationship, true);
+            if (false === empty($nestedRelationships)) {
                 if (false === $this->flattenedRelationships || true === is_a_real_array($nestedRelationships)) {
-                    $newRelationships[$key] = [
-                        self::REFERENCE_DATA => $nestedRelationships,
-                    ];
+                    $newRelationships[$key] = array_merge_recursive(
+                        $newRelationships[$key] ?? [],
+                        [
+                            self::REFERENCE_DATA => $nestedRelationships,
+                        ]
+                    );
                 } else {
                     foreach ($nestedRelationships as $subKey => $nestedRelationship) {
                         if (true === is_int($subKey)) {
-                            $newRelationships[$key] = [
-                                self::REFERENCE_DATA => $nestedRelationship,
-                            ];
+                            $newRelationships[$key] = array_merge_recursive(
+                                $newRelationships[$key] ?? [],
+                                [
+                                    self::REFERENCE_DATA => $nestedRelationship,
+                                ]
+                            );
                         } else {
-                            $newRelationships[$key . '.' . $subKey] = [
-                                self::REFERENCE_DATA => $nestedRelationship,
-                            ];
+                            if (true === $recursion) {
+                                $element = $nestedRelationship;
+                            } else {
+                                $element = [
+                                    self::REFERENCE_DATA => $nestedRelationship,
+                                ];
+                            }
+
+                            $newRelationships[$key . '.' . $subKey] = array_merge_recursive(
+                                $newRelationships[$key . '.' . $subKey] ?? [],
+                                $element
+                            );
                         }
                     }
                 }
+            }
 
+            if (false === self::isReference($relationship)) {
                 continue;
             }
 
             $this->referencesContainer[
-            $relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]
+                $relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]
             ] = $this->parseReference($relationship);
 
             $relationship = self::keepReferenceKeys($relationship);
             if (true === $recursion) {
-                $newRelationships[$key] = $relationship;
+                $element = $relationship;
             } else {
-                $newRelationships[$key] = [
+                $element = [
                     self::REFERENCE_DATA => $relationship,
                 ];
             }
+
+            $newRelationships[$key] = array_merge_recursive(
+                $newRelationships[$key] ?? [],
+                $element
+            );
         }
 
         return $newRelationships;
