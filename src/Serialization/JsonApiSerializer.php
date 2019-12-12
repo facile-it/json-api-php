@@ -26,7 +26,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
      *
      * @return array
      */
-    public function serialize(array $elements, bool $flattenedRelationships = true): array
+    public function serialize(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
     {
         $this->flattenedRelationships = $flattenedRelationships;
 
@@ -54,7 +54,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
      *
      * @return string
      */
-    public function serializeString(string $jsonString, bool $flattenedRelationships = true): string
+    public function serializeString(string $jsonString, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): string
     {
         $elements = json_decode($jsonString, true);
         if (null === $elements) {
@@ -75,7 +75,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
      *
      * @return array
      */
-    public function __invoke(array $elements, bool $flattenedRelationships = true): array
+    public function __invoke(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
     {
         return $this->serialize($elements, $flattenedRelationships);
     }
@@ -208,19 +208,23 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                 continue;
             }
 
-            //$this->flattenedRelationships
-
             if (false === self::isReference($relationship)) {
                 $nestedRelationships = $this->extractRelationships($relationship, true);
-                foreach ($nestedRelationships as $subKey => $nestedRelationship) {
-                    if (true === is_int($subKey)) {
-                        $newRelationships[$key] = [
-                            self::REFERENCE_DATA => $nestedRelationship,
-                        ];
-                    } else {
-                        $newRelationships[$key . '.' . $subKey] = [
-                            self::REFERENCE_DATA => $nestedRelationship,
-                        ];
+                if (false === $this->flattenedRelationships) {
+                    $newRelationships[$key] = [
+                        self::REFERENCE_DATA => $nestedRelationships,
+                    ];
+                } else {
+                    foreach ($nestedRelationships as $subKey => $nestedRelationship) {
+                        if (true === is_int($subKey)) {
+                            $newRelationships[$key] = [
+                                self::REFERENCE_DATA => $nestedRelationship,
+                            ];
+                        } else {
+                            $newRelationships[$key . '.' . $subKey] = [
+                                self::REFERENCE_DATA => $nestedRelationship,
+                            ];
+                        }
                     }
                 }
 

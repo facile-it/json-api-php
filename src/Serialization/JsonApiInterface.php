@@ -17,4 +17,7 @@ interface JsonApiInterface
 
     /** @var string */
     public const REFERENCE_DATA = 'data';
+
+    /** @var bool */
+    public const DEFAULT_FLATTENED_RELATIONSHIPS = true;
 }

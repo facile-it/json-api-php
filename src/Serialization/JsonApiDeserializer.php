@@ -26,7 +26,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @return array
      */
-    public function deserialize(array $elements, bool $flattenedRelationships = true): array
+    public function deserialize(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
     {
         $this->flattenedRelationships = $flattenedRelationships;
         $this->referencesContainer = self::moveReferences($elements);
@@ -38,11 +38,11 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      * @param string $jsonApiString
      * @param bool $flattenedRelationships
      *
-     * @return string
      * @throws RuntimeException
      *
+     * @return string
      */
-    public function deserializeToString(string $jsonApiString, bool $flattenedRelationships = true): string
+    public function deserializeToString(string $jsonApiString, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): string
     {
         $elements = json_decode($jsonApiString, true);
         if (null === $elements) {
@@ -63,7 +63,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @return array
      */
-    public function __invoke(array $elements, bool $flattenedRelationships = true): array
+    public function __invoke(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
     {
         return $this->deserialize($elements, $flattenedRelationships);
     }
@@ -120,7 +120,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
         if (true === array_key_exists(self::REFERENCE_KEYS_ID, $reference)) {
             $keys['_' . self::REFERENCE_KEYS_ID] = is_numeric($reference[self::REFERENCE_KEYS_ID])
-                ? (int)$reference[self::REFERENCE_KEYS_ID]
+                ? (int) $reference[self::REFERENCE_KEYS_ID]
                 : $reference[self::REFERENCE_KEYS_ID];
         }
 
@@ -188,8 +188,8 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
             true === empty($relationships)
                 ? []
                 : array_merge(
-                ...$relationships
-            )
+                    ...$relationships
+                )
         );
 
         return true === empty($completedRelationship)

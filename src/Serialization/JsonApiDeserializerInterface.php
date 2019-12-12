@@ -14,7 +14,7 @@ interface JsonApiDeserializerInterface extends JsonApiInterface
      *
      * @return array
      */
-    public function deserialize(array $elements, bool $flattenedRelationships = false): array;
+    public function deserialize(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array;
 
     /**
      * @param string $jsonApiString
@@ -24,7 +24,7 @@ interface JsonApiDeserializerInterface extends JsonApiInterface
      *
      * @return string
      */
-    public function deserializeToString(string $jsonApiString, bool $flattenedRelationships = false): string;
+    public function deserializeToString(string $jsonApiString, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): string;
 
     /**
      * @param array $elements
@@ -32,5 +32,5 @@ interface JsonApiDeserializerInterface extends JsonApiInterface
      *
      * @return array
      */
-    public function __invoke(array $elements, bool $flattenedRelationships = false): array;
+    public function __invoke(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array;
 }
