@@ -174,23 +174,22 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
             }
 
             $pathParts = explode(self::NESTED_SEPARATOR, $path);
-            if (count($pathParts) > 1) {
-                $mainPath = current($pathParts);
-                $current = &$relationships[$mainPath] ?? [];
-
-                array_shift($pathParts);
-
-                foreach ($pathParts as $key) {
-                    $current = &$current[$key];
-                }
-
-                $relationships[$mainPath] = array_merge_recursive(
-                    $relationships[$mainPath],
-                    $relation
-                );
-
-                unset($relationships[$path]);
+            if (count($pathParts) <= 1) {
+                continue;
             }
+
+            $root = &$relationships[array_shift($pathParts)] ?? [];
+            while (count($pathParts) >= 1) {
+                $currentPath = array_shift($pathParts);
+                $root = &$root[is_numeric($currentPath) ? (int)$currentPath : $currentPath] ?? [];
+            }
+
+            $root = array_merge(
+                $root ?? [],
+                $relation
+            );
+
+            unset($relationships[$path]);
         }
 
         return $relationships;
