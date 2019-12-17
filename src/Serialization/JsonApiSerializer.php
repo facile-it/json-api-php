@@ -217,9 +217,12 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                 } else {
                     foreach ($nestedRelationships as $subKey => $nestedRelationship) {
                         if (true === is_int($subKey)) {
-                            $newRelationships[$key][$subKey] = [
-                                self::REFERENCE_DATA => $nestedRelationship,
-                            ];
+                            $newRelationships[$key][self::REFERENCE_DATA] = array_merge(
+                                $newRelationships[$key][self::REFERENCE_DATA] ?? [],
+                                [
+                                    $subKey => $nestedRelationship,
+                                ]
+                            );
                         } elseif (true === $recursion) {
                             $newRelationships[$key . self::NESTED_SEPARATOR . $subKey] = $nestedRelationship;
                         } else {

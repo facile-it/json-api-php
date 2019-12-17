@@ -26,8 +26,10 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @return array
      */
-    public function deserialize(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
-    {
+    public function deserialize(
+        array $elements,
+        bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS
+    ): array {
         $this->flattenedRelationships = $flattenedRelationships;
         $this->referencesContainer = self::moveReferences($elements);
 
@@ -42,8 +44,10 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @return string
      */
-    public function deserializeToString(string $jsonApiString, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): string
-    {
+    public function deserializeToString(
+        string $jsonApiString,
+        bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS
+    ): string {
         $elements = json_decode($jsonApiString, true);
         if (null === $elements) {
             throw new RuntimeException('Not valid JSON string');
@@ -63,8 +67,10 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @return array
      */
-    public function __invoke(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
-    {
+    public function __invoke(
+        array $elements,
+        bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS
+    ): array {
         return $this->deserialize($elements, $flattenedRelationships);
     }
 
@@ -178,13 +184,26 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
                 continue;
             }
 
+            $counter = 0;
+            foreach ($pathParts as $pathPart) {
+                if (true === is_numeric($pathPart)) {
+                    continue;
+                }
+
+                if (++$counter % 2 === 0) {
+                    continue;
+                }
+
+                array_splice($pathParts, $counter, 0, self::REFERENCE_DATA);
+            }
+
             $root = &$relationships[array_shift($pathParts)] ?? [];
             while (count($pathParts) >= 1) {
                 $currentPath = array_shift($pathParts);
-                $root = &$root[is_numeric($currentPath) ? (int)$currentPath : $currentPath] ?? [];
+                $root = &$root[is_numeric($currentPath) ? (int) $currentPath : $currentPath] ?? [];
             }
 
-            $root = array_merge(
+            $root = array_merge_recursive(
                 $root ?? [],
                 $relation
             );

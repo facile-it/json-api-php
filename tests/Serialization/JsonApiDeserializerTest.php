@@ -86,20 +86,18 @@ class JsonApiDeserializerTest extends TestCase
                         "id": "2"
                     }
                 },
-                "e": [
-                    {
-                        "data": {
+                "e": {
+                    "data": [
+                        {
                             "type": "type",
                             "id": "1"
-                        }
-                    },
-                    {
-                        "data": {
+                        },
+                        {
                             "type": "type",
                             "id": "3"
                         }
-                    }
-                ]
+                    ]
+                }
             }
         }
     ],
