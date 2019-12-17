@@ -20,6 +20,8 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     /** @var array */
     private $referencesContainer = [];
 
+    use JsonApiSerializerDeserializerTrait;
+
     /**
      * @param array $elements
      * @param bool $flattenedRelationships
@@ -86,26 +88,6 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
         }
 
         return true === array_keys_exists([self::REFERENCE_KEYS_TYPE, self::REFERENCE_KEYS_ID], $element);
-    }
-
-    /**
-     * @param mixed $element
-     *
-     * @return bool
-     */
-    private static function isArrayOfReference($element): bool
-    {
-        if (false === is_array($element)) {
-            return false;
-        }
-
-        return array_reduce(
-            $element,
-            static function ($valid, $item): bool {
-                return $valid && true === self::isReference($item);
-            },
-            true
-        );
     }
 
     /**
@@ -242,7 +224,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
         $relationships = array_map(
             function ($key, $item) {
-                return $this->parseRelationship($key, $item[self::REFERENCE_DATA]);
+                return $this->parseRelationship($key, $item[self::REFERENCE_DATA] ?? $item);
             },
             array_keys($relationships),
             $relationships
@@ -264,25 +246,30 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     }
 
     /**
-     * @param string $name
+     * @param string|int $key
      * @param array $relationship
      * @param bool $arrayOf
      *
      * @return array|null
      */
-    private function parseRelationship(string $name, array $relationship, bool $arrayOf = false): ?array
+    private function parseRelationship($key, array $relationship, bool $arrayOf = false): ?array
     {
         if (true === empty($relationship)) {
             return $relationship;
         }
 
-        if (true === self::isArrayOfReference($relationship)) {
+        if (true === self::isArrayOfReference($relationship) || true === is_array_of_array($relationship)) {
             return [
-                $name => array_map(
-                    function ($relationship) use ($name): ?array {
-                        return $this->parseRelationship($name, $relationship, true);
+                $key => array_map(
+                    function ($key, $item) {
+                        if (false === is_array($item)) {
+                            return $item;
+                        }
+
+                        return $this->parseRelationship($key, $item[self::REFERENCE_DATA] ?? $item, true);
                     },
-                    $relationship
+                    array_keys($relationship),
+                    array_values($relationship)
                 ),
             ];
         }
@@ -297,7 +284,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
         }
 
         return [
-            $name => $completeRelationship,
+            $key => $completeRelationship,
         ];
     }
 

@@ -20,6 +20,8 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     /** @var array */
     private $referencesContainer = [];
 
+    use JsonApiSerializerDeserializerTrait;
+
     /**
      * @param array $elements
      * @param bool $flattenedRelationships
@@ -92,36 +94,6 @@ class JsonApiSerializer implements JsonApiSerializerInterface
         }
 
         return true === array_keys_exists([self::REFERENCE_KEYS_TYPE, self::REFERENCE_KEYS_ID], $element);
-    }
-
-    /**
-     * @param mixed $element
-     * @param bool $all
-     *
-     * @return bool
-     */
-    private static function isArrayOfReference($element, bool $all = true): bool
-    {
-        if (false === is_array($element)) {
-            return false;
-        }
-
-        if (true === empty($element)) {
-            return false;
-        }
-
-        return array_reduce(
-            $element,
-            static function ($valid, $item) use ($all): bool {
-                $isReference = self::isReference($item);
-                if (true === $all) {
-                    return true === $valid && true === $isReference;
-                }
-
-                return true === $valid || true === $isReference;
-            },
-            $all
-        );
     }
 
     /**
