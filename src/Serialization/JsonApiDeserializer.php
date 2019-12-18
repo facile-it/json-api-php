@@ -258,24 +258,27 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
             return $relationship;
         }
 
-        if (true === self::isArrayOfReference($relationship) || true === is_array_of_array($relationship)) {
-            return [
-                $key => array_map(
-                    function ($key, $item) {
-                        if (false === is_array($item)) {
-                            return $item;
-                        }
+        if (true === is_array_of_array($relationship)) {
+            $recursiveRelationships = array_filter(
+                $relationship,
+                static function ($item) {
+                    return true === is_array($item) && true === array_key_exists(self::REFERENCE_DATA, $item);
+                }
+            );
+            $normalRelationships = array_diff_assoc($relationship, $recursiveRelationships);
 
-                        return $this->parseRelationship($key, $item[self::REFERENCE_DATA] ?? $item, true);
-                    },
-                    array_keys($relationship),
-                    array_values($relationship)
+            return [
+                $key => array_merge(
+                    $this->completeRelationship($normalRelationships),
+                    ...array_map(
+                        function ($subKey, $item) {
+                            return $this->parseRelationship($subKey, $item[self::REFERENCE_DATA], true);
+                        },
+                        array_keys($recursiveRelationships),
+                        array_values($recursiveRelationships)
+                    )
                 ),
             ];
-        }
-
-        if (false === self::isReference($relationship)) {
-            return $relationship;
         }
 
         $completeRelationship = $this->completeRelationship($relationship);

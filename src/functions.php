@@ -29,7 +29,6 @@ function is_a_real_array(array $haystack): bool
     );
 }
 
-
 /**
  * @param array $haystack
  * @param bool $all
