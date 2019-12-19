@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Facile\JsonApiPhp\Tests\Unit\Serialization;
+namespace Facile\JsonApiPhp\Tests\Serialization;
 
 use Facile\JsonApiPhp\Serialization\JsonApiDeserializer;
 use Facile\JsonApiPhp\Serialization\JsonApiDeserializerInterface;
@@ -176,7 +176,11 @@ class JsonApiDeserializerTest extends TestCase
             "bb": {
                 "_type": "b",
                 "_id": 1,
-                "a": 1
+                "ccc": {
+                    "_type": "c",
+                    "_id": 1,
+                    "a": 1
+                }
             }
         },
         "f": [],
@@ -187,7 +191,11 @@ class JsonApiDeserializerTest extends TestCase
             "b": {
                 "_type": "b",
                 "_id": 1,
-                "a": 1
+                "ccc": {
+                    "_type": "c",
+                    "_id": 1,
+                    "a": 1
+                }
             }
         },
         "d": {

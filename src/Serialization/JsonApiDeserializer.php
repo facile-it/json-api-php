@@ -81,7 +81,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @return bool
      */
-    private static function isReference($element): bool
+    protected static function isReference($element): bool
     {
         if (false === is_array($element)) {
             return false;
@@ -158,6 +158,10 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
                 || self::REFERENCE_KEYS_ID === $path
                 || self::REFERENCE_KEYS_TYPE === $path
             ) {
+                continue;
+            }
+
+            if (false === is_string($path)) {
                 continue;
             }
 
@@ -246,13 +250,13 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     }
 
     /**
-     * @param string|int $key
+     * @param string $key
      * @param array $relationship
      * @param bool $arrayOf
      *
      * @return array|null
      */
-    private function parseRelationship($key, array $relationship, bool $arrayOf = false): ?array
+    private function parseRelationship(string $key, array $relationship, bool $arrayOf = false): ?array
     {
         if (true === empty($relationship)) {
             return $relationship;
@@ -267,29 +271,23 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
         );
         $normalRelationships = array_diff_assoc($relationship, $recursiveRelationships);
 
-        $parsedRelationship = array_merge(
-            $this->completeRelationship($normalRelationships) ?? [],
-            ...array_map(
-                function ($subKey, $item) {
-                    if (false === is_int($subKey)) {
-                        return $this->parseRelationship($subKey, $item[self::REFERENCE_DATA], true);
-                    }
-
-                    return [
-                        $subKey => $this->completeRelationship($item),
-                    ];
-                },
-                array_keys($recursiveRelationships),
-                array_values($recursiveRelationships)
-            )
-        );
-
-        if (true === $arrayOf) {
-            return $parsedRelationship;
-        }
-
         return [
-            $key => $parsedRelationship,
+            $key => array_merge(
+                $this->completeRelationship($normalRelationships) ?? [],
+                ...array_map(
+                    function ($subKey, $item) {
+                        if (false === is_int($subKey)) {
+                            return $this->parseRelationship($subKey, $item[self::REFERENCE_DATA], true);
+                        }
+
+                        return [
+                            $subKey => $this->completeRelationship($item),
+                        ];
+                    },
+                    array_keys($recursiveRelationships),
+                    array_values($recursiveRelationships)
+                )
+            ),
         ];
     }
 

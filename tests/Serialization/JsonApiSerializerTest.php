@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Facile\JsonApiPhp\Tests\Unit\Serialization;
+namespace Facile\JsonApiPhp\Tests\Serialization;
 
 use Facile\JsonApiPhp\Serialization\JsonApiSerializer;
 use Facile\JsonApiPhp\Serialization\JsonApiSerializerInterface;

@@ -87,7 +87,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
      *
      * @return bool
      */
-    private static function isReference($element): bool
+    protected static function isReference($element): bool
     {
         if (false === is_array($element)) {
             return false;
