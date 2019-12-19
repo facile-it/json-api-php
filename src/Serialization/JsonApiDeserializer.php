@@ -275,7 +275,9 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
                         return $this->parseRelationship($subKey, $item[self::REFERENCE_DATA], true);
                     }
 
-                    return $this->completeRelationship($item);
+                    return [
+                        $subKey => $this->completeRelationship($item),
+                    ];
                 },
                 array_keys($recursiveRelationships),
                 array_values($recursiveRelationships)
