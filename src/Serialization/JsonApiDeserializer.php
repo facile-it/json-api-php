@@ -14,15 +14,25 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     /** @var string */
     private const REFERENCE_KEYS_ID = 'id';
 
+    /** @var bool */
+    private $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS;
+
+    /** @var array */
     private $referencesContainer = [];
+
+    use JsonApiSerializerDeserializerTrait;
 
     /**
      * @param array $elements
+     * @param bool $flattenedRelationships
      *
      * @return array
      */
-    public function deserialize(array $elements): array
-    {
+    public function deserialize(
+        array $elements,
+        bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS
+    ): array {
+        $this->flattenedRelationships = $flattenedRelationships;
         $this->referencesContainer = self::moveReferences($elements);
 
         return $this->parseData($elements[self::REFERENCE_DATA] ?? []);
@@ -30,19 +40,22 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
     /**
      * @param string $jsonApiString
+     * @param bool $flattenedRelationships
      *
-     * @return string
      * @throws RuntimeException
      *
+     * @return string
      */
-    public function deserializeToString(string $jsonApiString): string
-    {
+    public function deserializeToString(
+        string $jsonApiString,
+        bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS
+    ): string {
         $elements = json_decode($jsonApiString, true);
         if (null === $elements) {
             throw new RuntimeException('Not valid JSON string');
         }
 
-        $outputString = json_encode($this->deserialize($elements), JSON_PRETTY_PRINT);
+        $outputString = json_encode($this->deserialize($elements, $flattenedRelationships), JSON_PRETTY_PRINT);
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
@@ -52,12 +65,15 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
     /**
      * @param array $elements
+     * @param bool $flattenedRelationships
      *
      * @return array
      */
-    public function __invoke(array $elements): array
-    {
-        return $this->deserialize($elements);
+    public function __invoke(
+        array $elements,
+        bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS
+    ): array {
+        return $this->deserialize($elements, $flattenedRelationships);
     }
 
     /**
@@ -65,33 +81,13 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
      *
      * @return bool
      */
-    private static function isReference($element): bool
+    protected static function isReference($element): bool
     {
         if (false === is_array($element)) {
             return false;
         }
 
         return true === array_keys_exists([self::REFERENCE_KEYS_TYPE, self::REFERENCE_KEYS_ID], $element);
-    }
-
-    /**
-     * @param mixed $element
-     *
-     * @return bool
-     */
-    private static function isArrayOfReference($element): bool
-    {
-        if (false === is_array($element)) {
-            return false;
-        }
-
-        return array_reduce(
-            $element,
-            static function ($valid, $item): bool {
-                return $valid && true === self::isReference($item);
-            },
-            true
-        );
     }
 
     /**
@@ -112,7 +108,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
         if (true === array_key_exists(self::REFERENCE_KEYS_ID, $reference)) {
             $keys['_' . self::REFERENCE_KEYS_ID] = is_numeric($reference[self::REFERENCE_KEYS_ID])
-                ? (int)$reference[self::REFERENCE_KEYS_ID]
+                ? (int) $reference[self::REFERENCE_KEYS_ID]
                 : $reference[self::REFERENCE_KEYS_ID];
         }
 
@@ -145,6 +141,66 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     }
 
     /**
+     * @param array $relationships
+     *
+     * @return array
+     */
+    private static function unnestRelationships(array $relationships): array
+    {
+        if (true === empty($relationships)) {
+            return $relationships;
+        }
+
+        foreach ($relationships as $path => $relation) {
+            if (self::REFERENCE_DATA === $path
+                || self::REFERENCE_ATTRIBUTES === $path
+                || self::REFERENCE_RELATIONSHIPS === $path
+                || self::REFERENCE_KEYS_ID === $path
+                || self::REFERENCE_KEYS_TYPE === $path
+            ) {
+                continue;
+            }
+
+            if (false === is_string($path)) {
+                continue;
+            }
+
+            $pathParts = explode(self::NESTED_SEPARATOR, $path);
+            if (count($pathParts) <= 1) {
+                continue;
+            }
+
+            $counter = 0;
+            foreach ($pathParts as $pathPart) {
+                if (true === is_numeric($pathPart)) {
+                    continue;
+                }
+
+                if (++$counter % 2 === 0) {
+                    continue;
+                }
+
+                array_splice($pathParts, $counter, 0, self::REFERENCE_DATA);
+            }
+
+            $root = &$relationships[array_shift($pathParts)] ?? [];
+            while (count($pathParts) >= 1) {
+                $currentPath = array_shift($pathParts);
+                $root = &$root[is_numeric($currentPath) ? (int) $currentPath : $currentPath] ?? [];
+            }
+
+            $root = array_merge_recursive(
+                $root ?? [],
+                $relation
+            );
+
+            unset($relationships[$path]);
+        }
+
+        return $relationships;
+    }
+
+    /**
      * @param array $relationship
      *
      * @return array|null
@@ -153,6 +209,10 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     {
         $attributes = $relationship[self::REFERENCE_ATTRIBUTES] ?? [];
         $relationships = $relationship[self::REFERENCE_RELATIONSHIPS] ?? [];
+
+        if (true === $this->flattenedRelationships) {
+            $relationships = self::unnestRelationships($relationships);
+        }
 
         if (false === empty($this->referencesContainer)
             && false === array_keys_exists([self::REFERENCE_ATTRIBUTES, self::REFERENCE_RELATIONSHIPS], $relationship)
@@ -168,7 +228,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
 
         $relationships = array_map(
             function ($key, $item) {
-                return $this->parseRelationship($key, $item[self::REFERENCE_DATA]);
+                return $this->parseRelationship($key, $item[self::REFERENCE_DATA] ?? $item);
             },
             array_keys($relationships),
             $relationships
@@ -180,8 +240,8 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
             true === empty($relationships)
                 ? []
                 : array_merge(
-                ...$relationships
-            )
+                    ...$relationships
+                )
         );
 
         return true === empty($completedRelationship)
@@ -190,40 +250,44 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
     }
 
     /**
-     * @param string $name
+     * @param string $key
      * @param array $relationship
      * @param bool $arrayOf
      *
      * @return array|null
      */
-    private function parseRelationship(string $name, array $relationship, bool $arrayOf = false): ?array
+    private function parseRelationship(string $key, array $relationship, bool $arrayOf = false): ?array
     {
         if (true === empty($relationship)) {
             return $relationship;
         }
 
-        if (true === self::isArrayOfReference($relationship)) {
-            return [
-                $name => array_map(
-                    function ($relationship) use ($name): ?array {
-                        return $this->parseRelationship($name, $relationship, true);
-                    },
-                    $relationship
-                ),
-            ];
-        }
-
-        if (false === self::isReference($relationship)) {
-            return $relationship;
-        }
-
-        $completeRelationship = $this->completeRelationship($relationship);
-        if (true === $arrayOf) {
-            return $completeRelationship;
-        }
+        $recursiveRelationships = array_filter(
+            $relationship,
+            static function ($item, $key) {
+                return true === is_int($key) || (true === is_array($item) && true === array_key_exists(self::REFERENCE_DATA, $item));
+            },
+            ARRAY_FILTER_USE_BOTH
+        );
+        $normalRelationships = array_diff_assoc($relationship, $recursiveRelationships);
 
         return [
-            $name => $completeRelationship,
+            $key => array_merge(
+                $this->completeRelationship($normalRelationships) ?? [],
+                ...array_map(
+                    function ($subKey, $item) {
+                        if (false === is_int($subKey)) {
+                            return $this->parseRelationship($subKey, $item[self::REFERENCE_DATA], true);
+                        }
+
+                        return [
+                            $subKey => $this->completeRelationship($item),
+                        ];
+                    },
+                    array_keys($recursiveRelationships),
+                    array_values($recursiveRelationships)
+                )
+            ),
         ];
     }
 

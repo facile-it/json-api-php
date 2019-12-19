@@ -14,15 +14,24 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     /** @var string */
     private const REFERENCE_KEYS_ID = '_id';
 
+    /** @var bool */
+    private $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS;
+
+    /** @var array */
     private $referencesContainer = [];
+
+    use JsonApiSerializerDeserializerTrait;
 
     /**
      * @param array $elements
+     * @param bool $flattenedRelationships
      *
      * @return array
      */
-    public function serialize(array $elements): array
+    public function serialize(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
     {
+        $this->flattenedRelationships = $flattenedRelationships;
+
         $jsonApiArray = [];
         $jsonApiArray[self::REFERENCE_DATA] = $this->processRecursiveElement(
             $elements
@@ -41,19 +50,20 @@ class JsonApiSerializer implements JsonApiSerializerInterface
 
     /**
      * @param string $jsonString
+     * @param bool $flattenedRelationships
      *
      * @throws RuntimeException
      *
      * @return string
      */
-    public function serializeString(string $jsonString): string
+    public function serializeString(string $jsonString, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): string
     {
         $elements = json_decode($jsonString, true);
         if (null === $elements) {
             throw new RuntimeException('Not valid JSON string');
         }
 
-        $outputString = json_encode($this->serialize($elements), JSON_PRETTY_PRINT);
+        $outputString = json_encode($this->serialize($elements, $flattenedRelationships), JSON_PRETTY_PRINT);
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
@@ -63,12 +73,13 @@ class JsonApiSerializer implements JsonApiSerializerInterface
 
     /**
      * @param array $elements
+     * @param bool $flattenedRelationships
      *
      * @return array
      */
-    public function __invoke(array $elements): array
+    public function __invoke(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
     {
-        return $this->serialize($elements);
+        return $this->serialize($elements, $flattenedRelationships);
     }
 
     /**
@@ -76,43 +87,13 @@ class JsonApiSerializer implements JsonApiSerializerInterface
      *
      * @return bool
      */
-    private static function isReference($element): bool
+    protected static function isReference($element): bool
     {
         if (false === is_array($element)) {
             return false;
         }
 
         return true === array_keys_exists([self::REFERENCE_KEYS_TYPE, self::REFERENCE_KEYS_ID], $element);
-    }
-
-    /**
-     * @param mixed $element
-     * @param bool $all
-     *
-     * @return bool
-     */
-    private static function isArrayOfReference($element, bool $all = true): bool
-    {
-        if (false === is_array($element)) {
-            return false;
-        }
-
-        if (true === empty($element)) {
-            return false;
-        }
-
-        return array_reduce(
-            $element,
-            static function ($valid, $item) use ($all): bool {
-                $isReference = self::isReference($item);
-                if (true === $all) {
-                    return true === $valid && true === $isReference;
-                }
-
-                return true === $valid || true === $isReference;
-            },
-            $all
-        );
     }
 
     /**
@@ -199,26 +180,53 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                 continue;
             }
 
-            if (false === self::isReference($relationship)) {
-                $newRelationships[$key] = [
-                    self::REFERENCE_DATA => $this->extractRelationships($relationship, true),
-                ];
+            $nestedRelationships = $this->extractRelationships($relationship, true);
+            if (false === empty($nestedRelationships)) {
+                if (false === $this->flattenedRelationships || true === is_a_real_array($nestedRelationships)) {
+                    $newRelationships[$key] = [
+                        self::REFERENCE_DATA => $nestedRelationships,
+                    ];
+                } else {
+                    foreach ($nestedRelationships as $subKey => $nestedRelationship) {
+                        if (true === is_int($subKey)) {
+                            $newRelationships[$key][self::REFERENCE_DATA] = array_merge(
+                                $newRelationships[$key][self::REFERENCE_DATA] ?? [],
+                                [
+                                    $subKey => $nestedRelationship,
+                                ]
+                            );
+                        } elseif (true === $recursion) {
+                            $newRelationships[$key . self::NESTED_SEPARATOR . $subKey] = $nestedRelationship;
+                        } else {
+                            $newRelationships[$key . self::NESTED_SEPARATOR . $subKey] = [
+                                self::REFERENCE_DATA => $nestedRelationship,
+                            ];
+                        }
+                    }
+                }
+            }
 
+            if (false === self::isReference($relationship)) {
                 continue;
             }
 
             $this->referencesContainer[
-            $relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]
+                $relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]
             ] = $this->parseReference($relationship);
 
             $relationship = self::keepReferenceKeys($relationship);
             if (true === $recursion) {
-                $newRelationships[$key] = $relationship;
+                $element = $relationship;
             } else {
-                $newRelationships[$key] = [
+                $element = [
                     self::REFERENCE_DATA => $relationship,
                 ];
             }
+
+            $newRelationships[$key] = array_merge_recursive(
+                $newRelationships[$key] ?? [],
+                $element
+            );
         }
 
         return $newRelationships;

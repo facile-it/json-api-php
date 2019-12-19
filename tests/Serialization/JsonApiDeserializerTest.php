@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Facile\JsonApiPhp\Tests\Unit\Serialization;
+namespace Facile\JsonApiPhp\Tests\Serialization;
 
 use Facile\JsonApiPhp\Serialization\JsonApiDeserializer;
 use Facile\JsonApiPhp\Serialization\JsonApiDeserializerInterface;
@@ -50,23 +50,39 @@ class JsonApiDeserializerTest extends TestCase
                 "f": []
             },
             "relationships": {
+                "b.b": {
+                    "data": {
+                        "type": "b",
+                        "id": "1"
+                    }
+                },
                 "b": {
                     "data": {
                         "type": "a",
                         "id": "1"
                     }
                 },
-                "c": {
+                "c.bb.ccc": {
                     "data": {
-                        "bb": {
-                            "type": "b",
-                            "id": "1"
-                        }
+                        "type": "c",
+                        "id": "1"
+                    }
+                },
+                "c.bb": {
+                    "data": {
+                        "type": "b",
+                        "id": "1"
                     }
                 },
                 "d": {
                     "data": {
                         "type": "a",
+                        "id": "2"
+                    }
+                },
+                "e.0.ccc": {
+                    "data": {
+                        "type": "type",
                         "id": "2"
                     }
                 },
@@ -89,8 +105,13 @@ class JsonApiDeserializerTest extends TestCase
         {
             "type": "b",
             "id": "1",
-            "attributes": {
-                "a": 1
+            "relationships": {
+                "ccc": {
+                    "data": {
+                        "type": "c",
+                        "id": "1"
+                    }
+                }
             }
         },
         {
@@ -111,6 +132,13 @@ class JsonApiDeserializerTest extends TestCase
         {
             "type": "a",
             "id": "2",
+            "attributes": {
+                "a": 1
+            }
+        },
+        {
+            "type": "c",
+            "id": "1",
             "attributes": {
                 "a": 1
             }
@@ -148,7 +176,11 @@ class JsonApiDeserializerTest extends TestCase
             "bb": {
                 "_type": "b",
                 "_id": 1,
-                "a": 1
+                "ccc": {
+                    "_type": "c",
+                    "_id": 1,
+                    "a": 1
+                }
             }
         },
         "f": [],
@@ -159,7 +191,11 @@ class JsonApiDeserializerTest extends TestCase
             "b": {
                 "_type": "b",
                 "_id": 1,
-                "a": 1
+                "ccc": {
+                    "_type": "c",
+                    "_id": 1,
+                    "a": 1
+                }
             }
         },
         "d": {
