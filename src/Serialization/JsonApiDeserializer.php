@@ -271,7 +271,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
             },
             ARRAY_FILTER_USE_BOTH
         );
-        $normalRelationships = array_diff_assoc($relationship, $recursiveRelationships);
+        $normalRelationships = array_diff_key($relationship, $recursiveRelationships);
 
         return [
             $key => array_merge(
