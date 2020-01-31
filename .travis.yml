@@ -25,7 +25,7 @@ install:
 
 script:
   - if [[ ${PHPSTAN} == 1 ]]; then ./vendor/bin/phpstan analyse --level 5 ./src/ ./tests/; fi
-  - if [[ ${COVERAGE} == 1 ]]; then phpdbg -qrr ./vendor/bin/paraunit coverage --clover=./build/logs/clover.xml; else ./vendor/bin/paraunit run; fi
+  - if [[ ${COVERAGE} == 1 ]]; then phpdbg -qrr ./vendor/bin/phpunit --coverage-clover ./build/logs/clover.xml; else ./vendor/bin/phpunit; fi
 
 after_success:
   - if [[ ${COVERAGE} == 1 ]]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./build/logs/clover.xml; fi

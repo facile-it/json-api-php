@@ -13,7 +13,7 @@ class JsonApiSerializerTest extends TestCase
     /** @var JsonApiSerializerInterface */
     private $jsonApiSerializer;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->jsonApiSerializer = new JsonApiSerializer();
     }

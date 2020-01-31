@@ -10,8 +10,8 @@
     },
     "require-dev": {
         "facile-it/facile-coding-standard": "^0.3.1",
-        "facile-it/paraunit": "^0.12.3",
-        "phpstan/phpstan": "^0.12.8"
+        "phpstan/phpstan": "^0.12.8",
+        "phpunit/phpunit": "^7.5|^8.5"
     },
     "config": {
         "optimize-autoloader": true,

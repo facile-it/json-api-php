@@ -1,5 +1,6 @@
 .env
 .idea
 .php_cs.cache
+.phpunit*
 /vendor/
 composer.lock
