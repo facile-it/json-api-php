@@ -10,7 +10,6 @@
     },
     "require-dev": {
         "facile-it/facile-coding-standard": "^0.3.1",
-        "facile-it/moka": "^2.3",
         "facile-it/paraunit": "^0.12.3",
         "phpstan/phpstan": "^0.12.8"
     },
