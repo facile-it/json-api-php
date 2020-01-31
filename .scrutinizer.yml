@@ -4,11 +4,13 @@ checks:
 coding_style:
   php:
     spaces:
+      before_parentheses:
+        closure_parameters: true
       around_operators:
         concatenation: true
         negation: true
       other:
-        after_type_cast: false
+        after_type_cast: true
 
 tools:
   external_code_coverage: true
