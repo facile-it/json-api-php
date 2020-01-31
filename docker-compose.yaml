@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  php:
+    container_name: ${COMPOSE_PROJECT_NAME}-php
+    build: ./.docker/
+    volumes:
+      - ./:/dist/:cached
+      - ./.docker/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:ro
+    working_dir: /dist/

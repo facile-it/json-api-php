@@ -1,5 +1,4 @@
+.env
 .idea
 .php_cs.cache
 /vendor/
-.env
-docker
