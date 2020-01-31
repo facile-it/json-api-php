@@ -5,7 +5,7 @@ coding_style:
   php:
     spaces:
       before_parentheses:
-        closure_parameters: true
+        closure_definition: true
       around_operators:
         concatenation: true
         negation: true
