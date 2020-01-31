@@ -217,7 +217,9 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
         if (false === empty($this->referencesContainer)
             && false === array_keys_exists([self::REFERENCE_ATTRIBUTES, self::REFERENCE_RELATIONSHIPS], $relationship)
         ) {
-            $reference = $this->referencesContainer[$relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]] ?? null;
+            $reference = self::isReference($relationship)
+                ? $this->referencesContainer[$relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]] ?? null
+                : null;
             if (null !== $reference) {
                 $attributes = $reference[self::REFERENCE_ATTRIBUTES] ?? [];
                 $relationships = $reference[self::REFERENCE_RELATIONSHIPS] ?? [];
@@ -269,7 +271,7 @@ class JsonApiDeserializer implements JsonApiDeserializerInterface
             },
             ARRAY_FILTER_USE_BOTH
         );
-        $normalRelationships = array_diff_assoc($relationship, $recursiveRelationships);
+        $normalRelationships = array_diff_key($relationship, $recursiveRelationships);
 
         return [
             $key => array_merge(

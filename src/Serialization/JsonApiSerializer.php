@@ -285,9 +285,9 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     /**
      * @param mixed $elements
      *
-     * @return array
+     * @return mixed
      */
-    private function processRecursiveElement($elements): array
+    private function processRecursiveElement($elements)
     {
         if (true === is_array($elements)) {
             $parsedReference = $this->parseReference($elements);
