@@ -19,10 +19,7 @@
         "preferred-install": {
             "*": "dist"
         },
-        "sort-packages": true,
-        "gitlab-domains": [
-            "gitlab.facile.it"
-        ]
+        "sort-packages": true
     },
     "autoload": {
         "psr-4": {
