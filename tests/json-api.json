@@ -17,7 +17,7 @@
       "d.C": {
         "data": {
           "type": "b",
-          "id": "1"
+          "id": "2"
         }
       },
       "E": {
@@ -30,11 +30,11 @@
         "data": [
           {
             "type": "b",
-            "id": "2"
+            "id": "3"
           },
           {
             "type": "b",
-            "id": "3"
+            "id": "4"
           }
         ]
       },
@@ -42,7 +42,7 @@
         "data": [
           {
             "type": "b",
-            "id": "4"
+            "id": "5"
           }
         ]
       }
@@ -71,6 +71,13 @@
     {
       "type": "b",
       "id": "1",
+      "attributes": {
+        "c": 1
+      }
+    },
+    {
+      "type": "b",
+      "id": "2",
       "relationships": {
         "D": {
           "data": {
@@ -82,7 +89,7 @@
     },
     {
       "type": "b",
-      "id": "2",
+      "id": "3",
       "relationships": {
         "g": {
           "data": {
@@ -94,11 +101,11 @@
     },
     {
       "type": "b",
-      "id": "3"
+      "id": "4"
     },
     {
       "type": "b",
-      "id": "4",
+      "id": "5",
       "relationships": {
         "H": {
           "data": [

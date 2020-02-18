@@ -51,14 +51,18 @@ class JsonApiSerializer implements JsonApiSerializerInterface
             if (true === $sort) {
                 usort($included, function ($a, $b): int {
                     return $a['type'] === $b['type']
-                        ? $a['id'] === $b['id']
+                        ? (
+                            $a['id'] === $b['id']
                             ? 0
                             : $a['id'] < $b['id']
                                 ? -1
                                 : 1
-                        : $a['type'] < $b['type']
+                        )
+                        : (
+                            $a['type'] < $b['type']
                             ? -1
-                            : 1;
+                            : 1
+                        );
                 });
             }
 
