@@ -63,7 +63,7 @@ class JsonApiSerializer implements JsonApiSerializerInterface
             throw new RuntimeException('Not valid JSON string');
         }
 
-        $outputString = json_encode($this->serialize($elements, $flattenedRelationships), JSON_PRETTY_PRINT);
+        $outputString = json_encode($this->serialize($elements, $flattenedRelationships));
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
