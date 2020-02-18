@@ -28,7 +28,11 @@ class JsonApiSerializerTest extends TestCase
     {
         $this->assertJsonStringEqualsJsonString(
             $expectedJsonString,
-            $this->jsonApiSerializer->serializeString($jsonString)
+            $this->jsonApiSerializer->serializeString(
+                $jsonString,
+                JsonApiSerializerInterface::DEFAULT_FLATTENED_RELATIONSHIPS,
+                true
+            )
         );
     }
 
@@ -37,6 +41,10 @@ class JsonApiSerializerTest extends TestCase
      */
     public function jsonString(): array
     {
+        $rawString = file_get_contents(__DIR__ . '/../raw.json');
+        $jsonApiString = file_get_contents(__DIR__ . '/../json-api.json');
+        $jsonApi = json_decode($jsonApiString, true);
+
         return [
             [
                 json_encode([
@@ -45,28 +53,28 @@ class JsonApiSerializerTest extends TestCase
                     'A' => [
                         '_type' => 'b',
                         '_id' => 1,
-                        'B' => ['_type' => 'c', '_id' => 1]
-                    ]
+                        'B' => ['_type' => 'c', '_id' => 1],
+                    ],
                 ]),
                 json_encode([
                     'data' => [
                         'type' => 'a',
                         'id' => '1',
                         'relationships' => [
-                            'A' => ['data' => ['type' => 'b', 'id' => '1']]
-                        ]
+                            'A' => ['data' => ['type' => 'b', 'id' => '1']],
+                        ],
                     ],
                     'included' => [
                         [
                             'type' => 'b',
                             'id' => '1',
                             'relationships' => [
-                                'B' => ['data' => ['type' => 'c', 'id' => '1']]
-                            ]
+                                'B' => ['data' => ['type' => 'c', 'id' => '1']],
+                            ],
                         ],
-                        ['type' => 'c', 'id' => '1']
-                    ]
-                ])
+                        ['type' => 'c', 'id' => '1'],
+                    ],
+                ]),
             ],
             [
                 json_encode([
@@ -75,37 +83,37 @@ class JsonApiSerializerTest extends TestCase
                     'A' => [
                         '_type' => 'b',
                         '_id' => 1,
-                        'B' => [['_type' => 'c', '_id' => 1]]
-                    ]
+                        'B' => [['_type' => 'c', '_id' => 1]],
+                    ],
                 ]),
                 json_encode([
                     'data' => [
                         'type' => 'a',
                         'id' => '1',
                         'relationships' => [
-                            'A' => ['data' => ['type' => 'b', 'id' => '1']]
-                        ]
+                            'A' => ['data' => ['type' => 'b', 'id' => '1']],
+                        ],
                     ],
                     'included' => [
                         [
                             'type' => 'b',
                             'id' => '1',
                             'relationships' => [
-                                'B' => ['data' => [['type' => 'c', 'id' => '1']]]
-                            ]
+                                'B' => ['data' => [['type' => 'c', 'id' => '1']]],
+                            ],
                         ],
-                        ['type' => 'c', 'id' => '1']
-                    ]
-                ])
+                        ['type' => 'c', 'id' => '1'],
+                    ],
+                ]),
             ],
+            [$rawString, $jsonApiString],
             [
-                file_get_contents(__DIR__ . '/../raw.json'),
-                file_get_contents(__DIR__ . '/../json-api.json'),
+                '[' . $rawString . ']',
+                json_encode([
+                    'data' => [$jsonApi['data']],
+                    'included' => $jsonApi['included'],
+                ]),
             ],
-            [
-                '[' . file_get_contents(__DIR__ . '/../raw.json') . ']',
-                '{"data":[' . json_encode(json_decode(file_get_contents(__DIR__ . '/../json-api.json'), true)['data']) . ']}'
-            ]
         ];
     }
 }

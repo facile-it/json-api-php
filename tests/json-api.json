@@ -5,8 +5,7 @@
       "d": {
         "_id": 1
       },
-      "f": {},
-      "i": []
+      "f": []
     },
     "relationships": {
       "A": {
@@ -51,18 +50,6 @@
   },
   "included": [
     {
-      "type": "b",
-      "id": "1",
-      "relationships": {
-        "D": {
-          "data": {
-            "type": "c",
-            "id": "1"
-          }
-        }
-      }
-    },
-    {
       "type": "a",
       "id": "1",
       "attributes": {
@@ -78,21 +65,19 @@
       }
     },
     {
-      "type": "c",
-      "id": "1",
-      "attributes": {
-        "e": 1
-      }
-    },
-    {
       "type": "a",
       "id": "2"
     },
     {
-      "type": "c",
-      "id": "2",
-      "attributes": {
-        "h": 1
+      "type": "b",
+      "id": "1",
+      "relationships": {
+        "D": {
+          "data": {
+            "type": "c",
+            "id": "1"
+          }
+        }
       }
     },
     {
@@ -112,14 +97,6 @@
       "id": "3"
     },
     {
-      "type": "c",
-      "id": "3"
-    },
-    {
-      "type": "c",
-      "id": "4"
-    },
-    {
       "type": "b",
       "id": "4",
       "relationships": {
@@ -136,6 +113,28 @@
           ]
         }
       }
+    },
+    {
+      "type": "c",
+      "id": "1",
+      "attributes": {
+        "e": 1
+      }
+    },
+    {
+      "type": "c",
+      "id": "2",
+      "attributes": {
+        "h": 1
+      }
+    },
+    {
+      "type": "c",
+      "id": "3"
+    },
+    {
+      "type": "c",
+      "id": "4"
     }
   ]
 }
