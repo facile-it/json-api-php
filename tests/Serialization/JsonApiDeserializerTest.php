@@ -24,9 +24,9 @@ class JsonApiDeserializerTest extends TestCase
      * @param string $jsonApiString
      * @param string $expectedJsonApiString
      */
-    public function testDeserialize(string $jsonApiString, string $expectedJsonApiString): void
+    public function testDeserialize(string $expectedJsonApiString, string $jsonApiString): void
     {
-        $this->assertEquals(
+        $this->assertJsonStringEqualsJsonString(
             $expectedJsonApiString,
             $this->jsonApiDeserializer->deserializeToString($jsonApiString)
         );
@@ -39,188 +39,73 @@ class JsonApiDeserializerTest extends TestCase
     {
         return [
             [
-                '{
-    "data": [
-        {
-            "attributes": {
-                "a": 1,
-                "c": {
-                    "_id": 2
-                },
-                "f": []
-            },
-            "relationships": {
-                "b.b": {
-                    "data": {
-                        "type": "b",
-                        "id": "1"
-                    }
-                },
-                "b": {
-                    "data": {
-                        "type": "a",
-                        "id": "1"
-                    }
-                },
-                "c.bb.ccc": {
-                    "data": {
-                        "type": "c",
-                        "id": "1"
-                    }
-                },
-                "c.bb": {
-                    "data": {
-                        "type": "b",
-                        "id": "1"
-                    }
-                },
-                "d": {
-                    "data": {
-                        "type": "a",
-                        "id": "2"
-                    }
-                },
-                "e.0.ccc": {
-                    "data": {
-                        "type": "type",
-                        "id": "2"
-                    }
-                },
-                "e": {
-                    "data": [
-                        {
-                            "type": "type",
-                            "id": "1"
-                        },
-                        {
-                            "type": "type",
-                            "id": "3"
-                        }
+                json_encode([
+                    '_type' => 'a',
+                    '_id' => 1,
+                    'A' => [
+                        '_type' => 'b',
+                        '_id' => 1,
+                        'B' => ['_type' => 'c', '_id' => 1]
                     ]
-                }
-            }
-        }
-    ],
-    "included": [
-        {
-            "type": "b",
-            "id": "1",
-            "relationships": {
-                "ccc": {
-                    "data": {
-                        "type": "c",
-                        "id": "1"
-                    }
-                }
-            }
-        },
-        {
-            "type": "a",
-            "id": "1",
-            "attributes": {
-                "a": 1
-            },
-            "relationships": {
-                "b": {
-                    "data": {
-                        "type": "b",
-                        "id": "1"
-                    }
-                }
-            }
-        },
-        {
-            "type": "a",
-            "id": "2",
-            "attributes": {
-                "a": 1
-            }
-        },
-        {
-            "type": "c",
-            "id": "1",
-            "attributes": {
-                "a": 1
-            }
-        },
-        {
-            "type": "type",
-            "id": "2",
-            "attributes": {
-                "ddd": 2
-            }
-        },
-        {
-            "type": "type",
-            "id": "1",
-            "relationships": {
-                "ccc": {
-                    "data": {
-                        "type": "type",
-                        "id": "2"
-                    }
-                }
-            }
-        },
-        {
-            "type": "type",
-            "id": "3"
-        }
-    ]
-}',
-                '[
-    {
-        "a": 1,
-        "c": {
-            "_id": 2,
-            "bb": {
-                "_type": "b",
-                "_id": 1,
-                "ccc": {
-                    "_type": "c",
-                    "_id": 1,
-                    "a": 1
-                }
-            }
-        },
-        "f": [],
-        "b": {
-            "_type": "a",
-            "_id": 1,
-            "a": 1,
-            "b": {
-                "_type": "b",
-                "_id": 1,
-                "ccc": {
-                    "_type": "c",
-                    "_id": 1,
-                    "a": 1
-                }
-            }
-        },
-        "d": {
-            "_type": "a",
-            "_id": 2,
-            "a": 1
-        },
-        "e": [
-            {
-                "_type": "type",
-                "_id": 1,
-                "ccc": {
-                    "_type": "type",
-                    "_id": 2,
-                    "ddd": 2
-                }
-            },
-            {
-                "_type": "type",
-                "_id": 3
-            }
-        ]
-    }
-]',
+                ]),
+                json_encode([
+                    'data' => [
+                        'type' => 'a',
+                        'id' => '1',
+                        'relationships' => [
+                            'A' => ['data' => ['type' => 'b', 'id' => '1']]
+                        ]
+                    ],
+                    'included' => [
+                        [
+                            'type' => 'b',
+                            'id' => '1',
+                            'relationships' => [
+                                'B' => ['data' => ['type' => 'c', 'id' => '1']]
+                            ]
+                        ],
+                        ['type' => 'c', 'id' => '1']
+                    ]
+                ])
             ],
+            [
+                json_encode([
+                    '_type' => 'a',
+                    '_id' => 1,
+                    'A' => [
+                        '_type' => 'b',
+                        '_id' => 1,
+                        'B' => [['_type' => 'c', '_id' => 1]]
+                    ]
+                ]),
+                json_encode([
+                    'data' => [
+                        'type' => 'a',
+                        'id' => '1',
+                        'relationships' => [
+                            'A' => ['data' => ['type' => 'b', 'id' => '1']]
+                        ]
+                    ],
+                    'included' => [
+                        [
+                            'type' => 'b',
+                            'id' => '1',
+                            'relationships' => [
+                                'B' => ['data' => [['type' => 'c', 'id' => '1']]]
+                            ]
+                        ],
+                        ['type' => 'c', 'id' => '1']
+                    ]
+                ])
+            ],
+            [
+                file_get_contents(__DIR__ . '/../raw.json'),
+                file_get_contents(__DIR__ . '/../json-api.json'),
+            ],
+            [
+                '[' . file_get_contents(__DIR__ . '/../raw.json') . ']',
+                '{"data":[' . json_encode(json_decode(file_get_contents(__DIR__ . '/../json-api.json'), true)['data']) . ']}'
+            ]
         ];
     }
 }
