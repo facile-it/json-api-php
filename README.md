@@ -1,6 +1,6 @@
 JSON API Serializer/Deserializer
 ===============
-[![Travis](https://img.shields.io/travis/facile-it/json-api-php/master.svg)](https://travis-ci.org/facile-it/json-api-php/branches)
+[![Travis](https://travis-ci.com/facile-it/json-api-php.svg?branch=master)](https://travis-ci.com/facile-it/json-api-php)
 [![Scrutinizer Coverage](https://img.shields.io/scrutinizer/coverage/g/facile-it/json-api-php.svg)](https://scrutinizer-ci.com/g/facile-it/json-api-php/?branch=master)
 [![Scrutinizer](https://img.shields.io/scrutinizer/g/facile-it/json-api-php.svg)](https://scrutinizer-ci.com/g/facile-it/json-api-php/?branch=master)
 
