@@ -1,8 +1,8 @@
 JSON API Serializer/Deserializer
 ===============
-[![Travis](https://travis-ci.com/facile-it/json-api-php.svg?branch=master)](https://travis-ci.com/facile-it/json-api-php)
-[![Scrutinizer Coverage](https://img.shields.io/scrutinizer/coverage/g/facile-it/json-api-php.svg)](https://scrutinizer-ci.com/g/facile-it/json-api-php/?branch=master)
-[![Scrutinizer](https://img.shields.io/scrutinizer/g/facile-it/json-api-php.svg)](https://scrutinizer-ci.com/g/facile-it/json-api-php/?branch=master)
+[![Build Status](https://travis-ci.com/facile-it/json-api-php.svg?branch=master)](https://travis-ci.com/facile-it/json-api-php)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/facile-it/json-api-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/facile-it/json-api-php/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/facile-it/json-api-php/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/facile-it/json-api-php/?branch=master)
 
 This library provides `serialize()` and `deserialize()` methods for normal JSON format.
 

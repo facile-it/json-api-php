@@ -1,0 +1,147 @@
+{
+  "data": {
+    "attributes": {
+      "a": 1,
+      "d": {
+        "_id": 1
+      },
+      "f": []
+    },
+    "relationships": {
+      "A": {
+        "data": {
+          "type": "a",
+          "id": "1"
+        }
+      },
+      "d.C": {
+        "data": {
+          "type": "b",
+          "id": "2"
+        }
+      },
+      "E": {
+        "data": {
+          "type": "a",
+          "id": "2"
+        }
+      },
+      "F": {
+        "data": [
+          {
+            "type": "b",
+            "id": "3"
+          },
+          {
+            "type": "b",
+            "id": "4"
+          }
+        ]
+      },
+      "G": {
+        "data": [
+          {
+            "type": "b",
+            "id": "5"
+          }
+        ]
+      }
+    }
+  },
+  "included": [
+    {
+      "type": "a",
+      "id": "1",
+      "attributes": {
+        "b": 1
+      },
+      "relationships": {
+        "B": {
+          "data": {
+            "type": "b",
+            "id": "1"
+          }
+        }
+      }
+    },
+    {
+      "type": "a",
+      "id": "2"
+    },
+    {
+      "type": "b",
+      "id": "1",
+      "attributes": {
+        "c": 1
+      }
+    },
+    {
+      "type": "b",
+      "id": "2",
+      "relationships": {
+        "D": {
+          "data": {
+            "type": "c",
+            "id": "1"
+          }
+        }
+      }
+    },
+    {
+      "type": "b",
+      "id": "3",
+      "relationships": {
+        "g": {
+          "data": {
+            "type": "c",
+            "id": "2"
+          }
+        }
+      }
+    },
+    {
+      "type": "b",
+      "id": "4"
+    },
+    {
+      "type": "b",
+      "id": "5",
+      "relationships": {
+        "H": {
+          "data": [
+            {
+              "type": "c",
+              "id": "3"
+            },
+            {
+              "type": "c",
+              "id": "4"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "c",
+      "id": "1",
+      "attributes": {
+        "e": 1
+      }
+    },
+    {
+      "type": "c",
+      "id": "2",
+      "attributes": {
+        "h": 1
+      }
+    },
+    {
+      "type": "c",
+      "id": "3"
+    },
+    {
+      "type": "c",
+      "id": "4"
+    }
+  ]
+}

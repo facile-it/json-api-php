@@ -6,6 +6,9 @@ namespace Facile\JsonApiPhp\Serialization;
 
 use RuntimeException;
 
+/**
+ * Class
+ */
 class JsonApiSerializer implements JsonApiSerializerInterface
 {
     /** @var string */
@@ -25,10 +28,11 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     /**
      * @param array $elements
      * @param bool $flattenedRelationships
+     * @param bool $sort
      *
      * @return array
      */
-    public function serialize(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
+    public function serialize(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS, bool $sort = false): array
     {
         $this->flattenedRelationships = $flattenedRelationships;
 
@@ -38,11 +42,33 @@ class JsonApiSerializer implements JsonApiSerializerInterface
         );
 
         if (false === empty($this->referencesContainer)) {
-            $jsonApiArray[self::REFERENCE_INCLUDED] = array_merge(
+            $included = array_merge(
                 ...array_values(
                     $this->referencesContainer
                 )
             );
+
+            if (true === $sort) {
+                usort($included, function ($a, $b): int {
+                    return $a['type'] === $b['type']
+                        ? (
+                            $a['id'] === $b['id']
+                            ? 0
+                            : (
+                                $a['id'] < $b['id']
+                            ? -1
+                            : 1
+                            )
+                        )
+                        : (
+                            $a['type'] < $b['type']
+                            ? -1
+                            : 1
+                        );
+                });
+            }
+
+            $jsonApiArray[self::REFERENCE_INCLUDED] = $included;
         }
 
         return $jsonApiArray;
@@ -51,19 +77,18 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     /**
      * @param string $jsonString
      * @param bool $flattenedRelationships
-     *
-     * @throws RuntimeException
+     * @param bool $sort
      *
      * @return string
      */
-    public function serializeString(string $jsonString, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): string
+    public function serializeString(string $jsonString, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS, bool $sort = false): string
     {
         $elements = json_decode($jsonString, true);
         if (null === $elements) {
             throw new RuntimeException('Not valid JSON string');
         }
 
-        $outputString = json_encode($this->serialize($elements, $flattenedRelationships), JSON_PRETTY_PRINT);
+        $outputString = json_encode($this->serialize($elements, $flattenedRelationships, $sort));
         if (false === $outputString) {
             throw new RuntimeException('Error during JSON encoding of the object');
         }
@@ -74,12 +99,13 @@ class JsonApiSerializer implements JsonApiSerializerInterface
     /**
      * @param array $elements
      * @param bool $flattenedRelationships
+     * @param bool $sort
      *
      * @return array
      */
-    public function __invoke(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS): array
+    public function __invoke(array $elements, bool $flattenedRelationships = self::DEFAULT_FLATTENED_RELATIONSHIPS, bool $sort = false): array
     {
-        return $this->serialize($elements, $flattenedRelationships);
+        return $this->serialize($elements, $flattenedRelationships, $sort);
     }
 
     /**
@@ -180,6 +206,26 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                 continue;
             }
 
+            if (true === self::isReference($relationship)) {
+                $this->referencesContainer[$relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]] = $this->parseReference($relationship);
+
+                $relationship = self::keepReferenceKeys($relationship);
+                if (true === $recursion) {
+                    $element = $relationship;
+                } else {
+                    $element = [
+                        self::REFERENCE_DATA => $relationship,
+                    ];
+                }
+
+                $newRelationships[$key] = array_merge_recursive(
+                    $newRelationships[$key] ?? [],
+                    $element
+                );
+
+                continue;
+            }
+
             $nestedRelationships = $this->extractRelationships($relationship, true);
             if (false === empty($nestedRelationships)) {
                 if (false === $this->flattenedRelationships || true === is_a_real_array($nestedRelationships)) {
@@ -205,28 +251,6 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                     }
                 }
             }
-
-            if (false === self::isReference($relationship)) {
-                continue;
-            }
-
-            $this->referencesContainer[
-                $relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]
-            ] = $this->parseReference($relationship);
-
-            $relationship = self::keepReferenceKeys($relationship);
-            if (true === $recursion) {
-                $element = $relationship;
-            } else {
-                $element = [
-                    self::REFERENCE_DATA => $relationship,
-                ];
-            }
-
-            $newRelationships[$key] = array_merge_recursive(
-                $newRelationships[$key] ?? [],
-                $element
-            );
         }
 
         return $newRelationships;
