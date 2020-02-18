@@ -54,9 +54,11 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                         ? (
                             $a['id'] === $b['id']
                             ? 0
-                            : $a['id'] < $b['id']
-                                ? -1
-                                : 1
+                            : (
+                                $a['id'] < $b['id']
+                            ? -1
+                            : 1
+                            )
                         )
                         : (
                             $a['type'] < $b['type']
