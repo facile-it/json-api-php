@@ -180,6 +180,26 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                 continue;
             }
 
+            if (true === self::isReference($relationship)) {
+                $this->referencesContainer[$relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]] = $this->parseReference($relationship);
+
+                $relationship = self::keepReferenceKeys($relationship);
+                if (true === $recursion) {
+                    $element = $relationship;
+                } else {
+                    $element = [
+                        self::REFERENCE_DATA => $relationship,
+                    ];
+                }
+
+                $newRelationships[$key] = array_merge_recursive(
+                    $newRelationships[$key] ?? [],
+                    $element
+                );
+
+                continue;
+            }
+
             $nestedRelationships = $this->extractRelationships($relationship, true);
             if (false === empty($nestedRelationships)) {
                 if (false === $this->flattenedRelationships || true === is_a_real_array($nestedRelationships)) {
@@ -205,28 +225,6 @@ class JsonApiSerializer implements JsonApiSerializerInterface
                     }
                 }
             }
-
-            if (false === self::isReference($relationship)) {
-                continue;
-            }
-
-            $this->referencesContainer[
-                $relationship[self::REFERENCE_KEYS_TYPE]][$relationship[self::REFERENCE_KEYS_ID]
-            ] = $this->parseReference($relationship);
-
-            $relationship = self::keepReferenceKeys($relationship);
-            if (true === $recursion) {
-                $element = $relationship;
-            } else {
-                $element = [
-                    self::REFERENCE_DATA => $relationship,
-                ];
-            }
-
-            $newRelationships[$key] = array_merge_recursive(
-                $newRelationships[$key] ?? [],
-                $element
-            );
         }
 
         return $newRelationships;
