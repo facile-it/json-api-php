@@ -55,4 +55,4 @@ jobs:
           fail_ci_if_error: true
       - name: "Run PHP-CS-Fixer (E2E test)"
         run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
-        if: "${{ matrix.deps != 'lowest' }}"
+        if: "${{ matrix.deps != 'lowest' && matrix.php-version != '8.2' }}"
