@@ -4,16 +4,19 @@
     "type": "library",
     "license": "proprietary",
     "require": {
-        "php": "^7.1",
+        "php": "^7.3|^8.0",
         "ext-json": "*",
         "psr/container": "^1.0"
     },
     "require-dev": {
-        "facile-it/facile-coding-standard": "^0.3.1",
+        "facile-it/facile-coding-standard": "^0.3.1|^0.5.2",
         "phpstan/phpstan": "^0.12.8",
         "phpunit/phpunit": "^7.5|^8.5"
     },
     "config": {
+        "allow-plugins": {
+            "facile-it/facile-coding-standard": true
+        },
         "optimize-autoloader": true,
         "preferred-install": {
             "*": "dist"

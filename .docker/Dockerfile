@@ -1,6 +1,7 @@
 FROM composer
-LABEL maintainer='dario.cancelliere@facile.it'
+LABEL maintainer='artoo-dev@facile.it'
 
+RUN apk add --update linux-headers
 RUN pecl channel-update pecl.php.net
 RUN pecl bundle -d /usr/src/php/ext/ xdebug
 RUN docker-php-ext-install xdebug

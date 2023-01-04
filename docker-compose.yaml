@@ -8,3 +8,4 @@ services:
       - ./:/dist/:cached
       - ./.docker/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:ro
     working_dir: /dist/
+    command: composer install
