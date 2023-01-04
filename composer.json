@@ -4,7 +4,7 @@
     "type": "library",
     "license": "proprietary",
     "require": {
-        "php": "^7.1|^8.0",
+        "php": "^7.3|^8.0",
         "ext-json": "*",
         "psr/container": "^1.0"
     },
