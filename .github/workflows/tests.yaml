@@ -47,12 +47,6 @@ jobs:
       - name: "Run PHPUnit with coverage"
         run: "vendor/bin/phpunit --coverage-clover=coverage.xml"
         if: "${{ matrix.coverage == 'true' }}"
-      - name: "Upload coverage"
-        uses: codecov/codecov-action@v1.0.6
-        if: "${{ matrix.coverage == 'true' }}"
-        with:
-          file: './coverage.xml'
-          fail_ci_if_error: true
       - name: "Run PHP-CS-Fixer (E2E test)"
         run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
         if: "${{ matrix.deps != 'lowest' && matrix.php-version != '8.2' }}"
