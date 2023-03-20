@@ -45,7 +45,6 @@ jobs:
         if: "${{ matrix.coverage != 'true' }}"
       - name: "Run PHPUnit with coverage"
         run: "vendor/bin/phpunit --coverage-clover=coverage.xml"
-        if: "${{ matrix.coverage == 'true' }}"
       - name: "Run PHP-CS-Fixer (E2E test)"
         run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
         if: "${{ matrix.deps != 'lowest' && matrix.php-version != '8.1' }}"
@@ -55,3 +54,4 @@ jobs:
       - name: Upload Scrutinizer coverage
         if: "${{ matrix.deps == 'highest' && matrix.php-version == '8.1' && matrix.coverage == 'true' }}"
         uses: sudo-bot/action-scrutinizer@latest
+        coverage-file: "coverage.xml"
