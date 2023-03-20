@@ -14,7 +14,6 @@ jobs:
           - "7.4"
           - "8.0"
           - "8.1"
-          - "8.2"
         deps:
           - "lowest"
           - "highest"
@@ -22,7 +21,7 @@ jobs:
           - "false"
         include:
           - deps: "highest"
-            php-version: "8.2"
+            php-version: "8.1"
             coverage: "true"
 
     steps:
@@ -49,4 +48,4 @@ jobs:
         if: "${{ matrix.coverage == 'true' }}"
       - name: "Run PHP-CS-Fixer (E2E test)"
         run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
-        if: "${{ matrix.deps != 'lowest' && matrix.php-version != '8.2' }}"
+        if: "${{ matrix.deps != 'lowest' && matrix.php-version != '8.1' }}"
