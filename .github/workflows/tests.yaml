@@ -54,4 +54,5 @@ jobs:
       - name: Upload Scrutinizer coverage
         if: "${{ matrix.deps == 'highest' && matrix.php-version == '8.1' && matrix.coverage == 'true' }}"
         uses: sudo-bot/action-scrutinizer@latest
-        coverage-file: "coverage.xml"
+        with:
+          coverage-file: "coverage.xml"
