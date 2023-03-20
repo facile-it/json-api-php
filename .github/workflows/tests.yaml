@@ -49,3 +49,10 @@ jobs:
       - name: "Run PHP-CS-Fixer (E2E test)"
         run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
         if: "${{ matrix.deps != 'lowest' && matrix.php-version != '8.1' }}"
+      - uses: actions/checkout@v2
+        if: "${{ matrix.deps = 'highest' && matrix.php-version = '8.1' }}"
+        with:
+          fetch-depth: 10
+      - name: Upload Scrutinizer coverage
+        if: "${{ matrix.deps = 'highest' && matrix.php-version = '8.1' }}"
+        uses: sudo-bot/action-scrutinizer@latest
